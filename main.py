@@ -92,17 +92,35 @@ def command_setup(args):
         return
 
     print("\nPILIHAN MODE OPERASIONAL:")
-    print("  1. Dual-Session (Standar PENS: Pagi 07:00-12:00 dan Sore 13:00-16:00)")
-    print("  2. Single-Session (1x sehari: 08:00-16:00)")
+    print("  1. Single-Session (1x sehari: misal 08:00-16:00 - Rekomendasi)")
+    print("  2. Dual-Session (2x sehari: Pagi 07:00-12:00 dan Sore 13:00-16:00)")
     mode_choice = input("Pilih mode [1]: ").strip()
-    mode = "single" if mode_choice == "2" else "dual"
+    mode = "dual" if mode_choice == "2" else "single"
+
+    print("\nINFORMASI INSTANSI & JAM KERJA MAGANG:")
+    default_company = profile.get('company') or "PT. Perusahaan Tempat KP"
+    company_input = input(f"Nama Perusahaan / Tempat KP [{default_company}]: ").strip()
+    company_name = company_input if company_input else default_company
+
+    start_time_val = "08:00"
+    end_time_val = "16:00"
+    if mode == "single":
+        start_input = input("Jam Mulai Kerja (format HH:mm) [08:00]: ").strip()
+        end_input = input("Jam Selesai Kerja (format HH:mm) [16:00]: ").strip()
+        if start_input:
+            start_time_val = start_input
+        if end_input:
+            end_time_val = end_input
+    else:
+        print("Jam kerja disetel standar dual session: Pagi 07:00-12:00 dan Sore 13:00-16:00.")
 
     print("\nPILIHAN BIDANG KEGIATAN:")
-    print("  1. software (Software Engineering, Web, Backend)")
-    print("  2. network  (Computer Network, Server, Mikrotik/Cisco)")
-    print("  3. general  (Kegiatan umum teknis dan operasional)")
+    print("  1. software   (Software Engineering, Web, Backend)")
+    print("  2. network    (Computer Network, Server, Mikrotik/Cisco)")
+    print("  3. it_support (IT Support, Hardware, Sistem Operasi)")
+    print("  4. general    (Kegiatan umum teknis dan operasional)")
     domain_choice = input("Pilih bidang kegiatan [1]: ").strip()
-    domain_map = {"1": "software", "2": "network", "3": "general"}
+    domain_map = {"1": "software", "2": "network", "3": "it_support", "4": "general"}
     domain = domain_map.get(domain_choice, "software")
 
     # Save to .env
@@ -128,11 +146,35 @@ def command_setup(args):
         f.write(env_content)
     print(f"\n[SUKSES] Konfigurasi kredensial tersimpan di: {ENV_PATH}")
 
-    # Copy config.example.yaml to config.yaml if not exist
-    if not os.path.exists(CONFIG_PATH) and os.path.exists(CONFIG_EXAMPLE_PATH):
-        with open(CONFIG_EXAMPLE_PATH, "r", encoding="utf-8") as src, open(CONFIG_PATH, "w", encoding="utf-8") as dst:
-            dst.write(src.read())
-        print(f"[SUKSES] File konfigurasi disiapkan di: {CONFIG_PATH}")
+    # Generate / update config.yaml with custom company and hours
+    cfg_base = {}
+    if os.path.exists(CONFIG_PATH):
+        with open(CONFIG_PATH, "r", encoding="utf-8") as f:
+            cfg_base = yaml.safe_load(f) or {}
+    elif os.path.exists(CONFIG_EXAMPLE_PATH):
+        with open(CONFIG_EXAMPLE_PATH, "r", encoding="utf-8") as f:
+            cfg_base = yaml.safe_load(f) or {}
+
+    if cfg_base:
+        if "settings" not in cfg_base:
+            cfg_base["settings"] = {}
+        cfg_base["settings"]["mode"] = mode
+        
+        if "company" not in cfg_base:
+            cfg_base["company"] = {}
+        cfg_base["company"]["name"] = company_name
+
+        if "schedule" not in cfg_base:
+            cfg_base["schedule"] = {}
+        if mode == "single":
+            if "single" not in cfg_base["schedule"]:
+                cfg_base["schedule"]["single"] = {}
+            cfg_base["schedule"]["single"]["start_time"] = start_time_val
+            cfg_base["schedule"]["single"]["end_time"] = end_time_val
+
+        with open(CONFIG_PATH, "w", encoding="utf-8") as f:
+            yaml.dump(cfg_base, f, allow_unicode=True, sort_keys=False)
+        print(f"[SUKSES] Konfigurasi jadwal dan instansi tersimpan di: {CONFIG_PATH}")
 
     print("\nInstalasi selesai. Anda dapat menjalankan perintah uji:")
     print("  python main.py test-login")
