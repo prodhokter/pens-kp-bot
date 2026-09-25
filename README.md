@@ -100,12 +100,51 @@ Masukkan **PENS NetID** (contoh: `user@student.pens.ac.id`) dan **Kata Sandi**. 
 
 ## Panduan Otomatisasi Penjadwalan
 
-### A. Windows (Task Scheduler)
-Gunakan berkas `scripts\run.bat` untuk dijadwalkan pada Windows Task Scheduler:
-1. Buka `taskschd.msc`.
-2. Buat tugas baru dengan trigger harian pukul `12:05` (Sesi Pagi) dan `16:05` (Sesi Sore).
-3. Arahkan aksi ke `C:\Windows\System32\cmd.exe` dengan argumen `/c "scripts\run.bat"`.
-4. Panduan langkah demi langkah bergambar tersedia di `docs/TUTORIAL_WINDOWS.md`.
+### A. Windows (Task Scheduler - 1-Klik)
+Cukup buka **Command Prompt as Administrator** dan jalankan:
+```cmd
+scripts\install_windows_task.bat
+```
+Masukkan jam eksekusi yang diinginkan (contoh: `16:15` WIB). Skrip akan otomatis mendaftarkan tugas ke Windows Task Scheduler dengan fitur **Catch-Up**: jika laptop Anda dalam keadaan mati atau tertidur (*sleep*) saat jam jadwal tiba, Windows akan otomatis mengeksekusi pengisian logbook sesegera mungkin saat laptop dinyalakan kembali.
+
+Panduan konfigurasi manual tersedia di `docs/TUTORIAL_WINDOWS.md`.
+
+---
+
+## 4 Pilihan Sumber Keterangan / Narasi Kegiatan
+
+Pada berkas `config.yaml`, teman Anda dapat menentukan dari mana bot mengambil narasi kegiatan logbook harian via parameter `activity_source.type`:
+
+| Pilihan Sumber | Parameter `type` | Cara Kerja & Keunggulan |
+| :--- | :--- | :--- |
+| **1. Bank Otomatis** | `bank` *(Default)* | **Nol Konfigurasi Tambahan.** Bot otomatis memilih kalimat narasi akademis formal dari bank template bidang kerja (`software`, `network`, `it_support`, `general`). |
+| **2. Berkas Teks** | `file` | Membaca draft kalimat dari file `kegiatan.txt` (bisa per tanggal atau daftar baris acak). Contoh format tersedia di `kegiatan.example.txt`. |
+| **3. AI Generator** | `ai` | Menggunakan Google Gemini API / Groq API gratis. Bot membuat 2-3 kalimat baru yang bervariasi setiap hari sesuai peran dan nama perusahaan tanpa repetisi. |
+| **4. Git Repository** | `git` | Mengekstrak ringkasan pesan commit git harian jika teman Anda aktif mengerjakan proyek pemrograman. |
+
+---
+
+## Penyesuaian Hari & Jam Kerja (`config.yaml`)
+
+Teman Anda dapat mengatur hari apa saja bot aktif mengisi dan rentang jam kerja di `config.yaml`:
+```yaml
+settings:
+  mode: single # 'single' (1x sehari) atau 'dual' (2x sehari)
+  
+  # Hari aktif pengisian (contoh: Senin sampai Jumat saja)
+  active_days:
+    - monday
+    - tuesday
+    - wednesday
+    - thursday
+    - friday
+
+schedule:
+  single:
+    start_time: "08:00"
+    end_time: "16:00"
+    trigger_time: "16:15"
+```
 
 ### B. Linux (Systemd Timer)
 Untuk pengguna VPS atau Linux desktop:

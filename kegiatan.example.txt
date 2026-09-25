@@ -1,0 +1,16 @@
+# ==============================================================================
+# CONTOH CATATAN KEGIATAN HARIAN LOGBOOK KP PENS (kegiatan.txt)
+# ==============================================================================
+# Anda dapat mengisi keterangan kegiatan menggunakan format berikut:
+#
+# FORMAT 1: Berdasarkan tanggal spesifik (YYYY-MM-DD : keterangan)
+# 2026-09-25 : Melakukan instalasi switch access dan penataan kabel patch panel di ruang server.
+# 2026-09-26 : Menganalisis log koneksi router gateway dan pengujian bandwidth failover.
+# 2026-09-29 : Melakukan konfigurasi subnet IP dan pengujian koneksi jaringan antar divisi.
+#
+# FORMAT 2: Daftar kegiatan acak (bot akan memilih secara otomatis bergantian tiap hari):
+Melakukan inventarisasi dan pemeliharaan perangkat workstation operasional kantor.
+Memperbarui konfigurasi sistem operasi dan instalasi aplikasi pendukung kerja tim.
+Melakukan pengujian koneksi jaringan lokal dan penanganan tiket keluhan helpdesk IT.
+Melakukan pencadangan basis data lokal ke media penyimpanan server terpusat.
+Membantu pendampingan teknis penggunaan perangkat lunak operasional pengguna.

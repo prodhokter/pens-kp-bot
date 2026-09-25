@@ -178,16 +178,21 @@ def command_preview(args):
             sys.exit(1)
 
     domain = args.domain or creds["domain"]
+    mode = creds["mode"] or config.get("settings", {}).get("mode", "single")
+
     print("==================================================")
     print(f"PREVIEW NARASI LOGBOOK - {format_date_id(target_date)}")
-    print(f"Bidang: {domain} | Tanggal: {target_date.strftime('%Y-%m-%d')}")
+    print(f"Mode: {mode.upper()} | Bidang: {domain} | Tanggal: {target_date.strftime('%Y-%m-%d')}")
     print("==================================================")
 
-    pagi = synthesize_activity(target_date, domain=domain, session_type="morning", config=config)
-    sore = synthesize_activity(target_date, domain=domain, session_type="afternoon", config=config)
-
-    print(f"\n[SESI PAGI / 07:00 - 12:00 WIB]:\n{pagi}\n")
-    print(f"[SESI SORE / 13:00 - 16:00 WIB]:\n{sore}\n")
+    if mode == "single":
+        single_text = synthesize_activity(target_date, domain=domain, session_type="single", config=config)
+        print(f"\n[SESI TUNGGAL / HARIAN]:\n{single_text}\n")
+    else:
+        pagi = synthesize_activity(target_date, domain=domain, session_type="morning", config=config)
+        sore = synthesize_activity(target_date, domain=domain, session_type="afternoon", config=config)
+        print(f"\n[SESI PAGI / 07:00 - 12:00 WIB]:\n{pagi}\n")
+        print(f"[SESI SORE / 13:00 - 16:00 WIB]:\n{sore}\n")
 
 def command_read_portal(args):
     """Reads entries currently recorded in PENS Online MIS."""
@@ -257,35 +262,49 @@ def command_run(args):
             print("[ERROR] Format tanggal tidak valid. Gunakan YYYY-MM-DD.")
             sys.exit(1)
 
-    # Weekend check
-    is_weekend = target_date.weekday() in (5, 6)
-    allow_weekends = config.get("settings", {}).get("allow_weekends", True)
-    if is_weekend and not allow_weekends and not args.force:
-        print(f"[{format_date_id(target_date)}] Hari ini akhir pekan dan allow_weekends dimatikan. Melewati.")
+    # Active days check (e.g. monday, tuesday, etc.)
+    day_name = target_date.strftime("%A").lower()
+    settings = config.get("settings", {})
+    active_days = [d.lower() for d in settings.get("active_days", ["monday", "tuesday", "wednesday", "thursday", "friday"])]
+    if day_name not in active_days and not args.force:
+        print(f"[{format_date_id(target_date)}] Hari {day_name.capitalize()} tidak termasuk dalam jadwal hari aktif {active_days}. Melewati.")
         return
 
     # Determine session to run
     session_arg = args.session.lower() if args.session else "auto"
-    mode = creds["mode"]
+    mode = creds["mode"] or settings.get("mode", "single")
+    schedule_cfg = config.get("schedule", {})
 
     sessions_to_run = []
     current_hour = datetime.datetime.now().hour
 
     if mode == "dual":
+        dual_cfg = schedule_cfg.get("dual", {})
+        m_cfg = dual_cfg.get("morning", {})
+        a_cfg = dual_cfg.get("afternoon", {})
+        m_start = m_cfg.get("start_time", "07:00")
+        m_end = m_cfg.get("end_time", "12:00")
+        a_start = a_cfg.get("start_time", "13:00")
+        a_end = a_cfg.get("end_time", "16:00")
+
         if session_arg == "morning":
-            sessions_to_run.append(("morning", "Pagi", "07:00", "12:00"))
+            sessions_to_run.append(("morning", "Pagi", m_start, m_end))
         elif session_arg == "afternoon":
-            sessions_to_run.append(("afternoon", "Sore", "13:00", "16:00"))
+            sessions_to_run.append(("afternoon", "Sore", a_start, a_end))
         elif session_arg == "all":
-            sessions_to_run.append(("morning", "Pagi", "07:00", "12:00"))
-            sessions_to_run.append(("afternoon", "Sore", "13:00", "16:00"))
+            sessions_to_run.append(("morning", "Pagi", m_start, m_end))
+            sessions_to_run.append(("afternoon", "Sore", a_start, a_end))
         else: # auto
             if current_hour < 14:
-                sessions_to_run.append(("morning", "Pagi", "07:00", "12:00"))
+                sessions_to_run.append(("morning", "Pagi", m_start, m_end))
             else:
-                sessions_to_run.append(("afternoon", "Sore", "13:00", "16:00"))
+                sessions_to_run.append(("afternoon", "Sore", a_start, a_end))
     else: # single mode
-        sessions_to_run.append(("single", "Penuh", "08:00", "16:00"))
+        s_cfg = schedule_cfg.get("single", {})
+        s_start = s_cfg.get("start_time", "08:00")
+        s_end = s_cfg.get("end_time", "16:00")
+        s_label = s_cfg.get("label", "Sesi Penuh")
+        sessions_to_run.append(("single", s_label, s_start, s_end))
 
     # Establish connection
     session = create_session(proxy_url=creds["proxy_url"])

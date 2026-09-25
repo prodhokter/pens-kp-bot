@@ -100,40 +100,44 @@ python main.py run
 
 ---
 
-## 6. Otomatisasi Harian via Windows Task Scheduler
+## 6. Otomatisasi Harian via Windows Task Scheduler (1-Klik)
 
-Agar logbook terisi otomatis setiap hari kerja tanpa perlu membuka terminal, pasang penjadwalan via **Windows Task Scheduler**:
+Agar logbook terisi otomatis setiap hari kerja tanpa perlu membuka terminal atau klik tombol apapun, gunakan skrip pemasang otomatis yang telah disediakan:
 
-### Langkah Pembuatan Task Sesi Siang (Pukul 12:05 WIB):
-1. Tekan tombol `Windows + R`, ketik `taskschd.msc`, lalu tekan `Enter`.
-2. Pada panel kanan, klik **Create Task...** (Buat Tugas).
-3. **Tab General:**
-   * Name: `PENS KP Logbook - Sesi Siang`
-   * Beri centang pada opsi **Run whether user is logged on or not** (atau *Run only when user is logged on* jika tidak ingin diminta password Windows).
-   * Beri centang **Run with highest privileges**.
-4. **Tab Triggers:**
-   * Klik **New...**
-   * Begin the task: `On a schedule`
-   * Pilih **Daily** (Harian), atur jam ke `12:05:00`.
-   * Klik **OK**.
-5. **Tab Actions:**
-   * Klik **New...**
-   * Action: `Start a program`
-   * Program/script: `C:\Windows\System32\cmd.exe`
-   * Add arguments: `/c "scripts\run.bat"`
-   * Start in: Masukkan path lengkap folder proyek Anda, contoh: `C:\Users\NamaAnda\Documents\pens-kp-bot`
-   * Klik **OK**.
-6. **Tab Conditions:**
-   * Hilangkan centang pada *Start the task only if the computer is on AC power* (agar tetap berjalan saat laptop menggunakan baterai).
-   * Beri centang pada *Wake the computer to run this task* (opsional).
-7. Klik **OK** untuk menyimpan.
+### Cara 1-Klik (Rekomendasi Utama):
+1. Buka **Command Prompt (CMD)** sebagai **Administrator** (klik kanan icon CMD -> *Run as administrator*).
+2. Arahkan ke folder proyek:
+   ```cmd
+   cd /d %USERPROFILE%\Documents\pens-kp-bot
+   ```
+3. Jalankan skrip pemasang otomatis:
+   ```cmd
+   scripts\install_windows_task.bat
+   ```
+4. Masukkan jam eksekusi harian yang Anda inginkan (contoh: `16:15` atau tekan `Enter` untuk default).
 
-### Langkah Pembuatan Task Sesi Sore (Pukul 16:05 WIB):
-* Ulangi langkah di atas dengan nama `PENS KP Logbook - Sesi Sore` dan Trigger diatur pada jam `16:05:00`.
+### Keunggulan Fitur Catch-Up Otomatis:
+Skrip ini secara otomatis mengaktifkan fitur `StartWhenAvailable`. Artinya:
+* **Jika laptop Anda sedang mati atau dalam mode Sleep/Tertidur pada pukul 16:15:**
+  Begitu laptop Anda dinyalakan kembali (misalnya malam hari jam 19:00 atau keesokan paginya), Windows akan **langsung mengeksekusi pengisian logbook hari tersebut secara otomatis di latar belakang** tanpa interupsi.
+* **Tetap berjalan saat memakai baterai:** Penjadwal tidak akan tertunda meskipun laptop sedang tidak terhubung ke charger.
 
 ---
 
-## 7. Pemantauan & Laporan
+## 7. Mengatur Sumber Keterangan Kegiatan Logbook
+
+Di dalam berkas `config.yaml`, teman Anda dapat memilih bagaimana narasi kegiatan logbook diisi:
+
+| Tipe Sumber | Nilai `activity_source.type` | Deskripsi & Cara Kerja |
+| :--- | :--- | :--- |
+| **1. Bank Otomatis** | `bank` *(Default)* | **100% Otomatis tanpa ketik apapun.** Bot akan memilih narasi akademis formal secara bergantian dari bank template bidang yang dipilih (`software`, `network`, `it_support`, `general`). |
+| **2. Berkas Teks** | `file` | Membaca dari berkas `kegiatan.txt`. Teman Anda dapat menulis daftar kegiatan atau menetapkan tanggal spesifik (lihat `kegiatan.example.txt`). |
+| **3. AI Generator** | `ai` | Menggunakan Google Gemini API gratis atau Groq API. Bot membuat 2-3 kalimat baru yang bervariasi setiap hari sesuai peran dan nama perusahaan. |
+| **4. Git Repository** | `git` | Mengambil pesan commit git harian jika teman Anda mengerjakan proyek berbasis pemrograman. |
+
+---
+
+## 8. Pemantauan & Laporan
 
 * Untuk melihat riwayat pengisian lokal:
   ```cmd
