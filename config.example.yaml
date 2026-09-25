@@ -1,0 +1,113 @@
+# ==============================================================================
+# KONFIGURASI OPERASIONAL PENS KP BOT
+# ==============================================================================
+
+settings:
+  # Mode Pengisian: 'dual' (2x sehari) atau 'single' (1x sehari)
+  mode: dual
+  
+  # Izinkan pengisian pada akhir pekan (Sabtu dan Minggu)
+  allow_weekends: true
+  
+  # Timeout request HTTP (detik)
+  request_timeout: 45
+  
+  # Cek entri portal sebelum submit untuk mencegah duplikasi (Idempotency)
+  check_existing_entries: true
+
+schedule:
+  dual:
+    morning:
+      label: "Sesi Pagi"
+      start_time: "07:00"
+      end_time: "12:00"
+      trigger_hour: 12
+    afternoon:
+      label: "Sesi Sore"
+      start_time: "13:00"
+      end_time: "16:00"
+      trigger_hour: 16
+  single:
+    label: "Sesi Penuh"
+    start_time: "08:00"
+    end_time: "16:00"
+    trigger_hour: 16
+
+company:
+  name: "PT. Perusahaan Tempat KP"
+  division: "Engineering & IT Operations"
+
+# Sanitizer Kata Kunci Kampus WAF (Mencegah false positive injeksi SQL)
+waf_sanitizer:
+  enabled: true
+  replacements:
+    "&": "dan"
+    "identity insert": "identity insersi"
+    "insert ": "penyisipan "
+    "hard delete": "penghapusan permanen"
+    "soft delete": "penonaktifan lunak"
+    "delete ": "penghapusan "
+    "drop ": "pelepasan "
+    "select ": "pemilihan "
+    "union ": "penggabungan "
+    "truncate ": "pengosongan "
+
+# Bank Template Kegiatan Akademik Berdasarkan Bidang Kerja
+domain_templates:
+  software:
+    morning:
+      weekday:
+        - "Melakukan peninjauan struktur arsitektur kode dan analisis kebutuhan modul backend sistem. Merancang penyesuaian skema entitas basis data serta perbaikan penanganan kueri relasional untuk integrasi alur data. Melakukan penyusunan rencana refaktorisasi modul guna meningkatkan efisiensi pemrosesan data."
+        - "Melakukan peninjauan struktur data dan optimasi alur komputasi pada modul layanan backend. Mengidentifikasi kendala performa pada modul pemrosesan transaksi serta merancang mekanisme caching in-memory guna mempercepat akses data berulang. Melakukan persiapan skenario pengujian unit sebelum implementasi lanjutan."
+        - "Menganalisis alur integrasi antarmuka pemrograman aplikasi (API) dan merancang validasi payload request. Melakukan inspeksi terhadap struktur respons endpoint serta menyusun skema penanganan galat terstandar untuk mempermudah integrasi lintas layanan."
+      saturday:
+        - "Melakukan evaluasi performa mingguan modul perangkat lunak serta analisis log kueri lambat pada basis data transaksi. Melakukan penyesuaian indeks kolom pada tabel relasional untuk menjaga stabilitas kueri baca berulang. Menyusun daftar prioritas perbaikan komponen backend untuk mendukung siklus pemeliharaan sistem."
+      sunday:
+        - "Melakukan peninjauan komprehensif terhadap dependensi pustaka perangkat lunak dan sinkronisasi dokumentasi teknis sistem. Memvalidasi keselarasan konfigurasi lingkungan pengembangan dengan standar produksi serta menyusun rencana kerja teknis untuk siklus pengembangan sepekan ke depan."
+    afternoon:
+      weekday:
+        - "Melanjutkan implementasi lanjutan modul antarmuka pengguna dan interlock logika operasional sistem. Melakukan pengujian integrasi fungsional menyeluruh serta verifikasi kepatuhan target interaksi pengguna pada berbagai resolusi layar. Melakukan kompilasi rilis perangkat lunak dan evaluasi kestabilan eksekusi proses pada lingkungan pengujian."
+        - "Melakukan implementasi interlock proteksi kesalahan operasional dan integrasi antarmuka dashboard monitoring. Menjalankan pengujian regresi menyeluruh untuk memverifikasi keandalan sistem terhadap berbagai skenario kegagalan data. Melakukan penerapan pembaruan versi pada server dan verifikasi telemetri kesehatan layanan pasca-deployment."
+        - "Menyelesaikan refaktorisasi komponen frontend dan pengikatan state manajemen aplikasi. Melakukan pengujian alur interaksi pengguna secara menyeluruh untuk memastikan tidak ada kebocoran memori atau keterlambatan rendering antarmuka."
+      saturday:
+        - "Melaksanakan simulasi pengujian regresi menyeluruh terhadap modul yang baru diperbarui serta verifikasi kelayakan antarmuka pengguna pada perangkat bergerak. Melakukan pembersihan berkas log sementara guna menjaga efisiensi kapasitas media penyimpanan server."
+      sunday:
+        - "Melakukan pengujian regresi menyeluruh terhadap skrip otomasi sistem serta sinkronisasi dokumentasi arsitektur perangkat lunak. Memastikan seluruh layanan backend dan basis data beroperasi normal menjelang pembukaan jam operasional hari Senin."
+
+  network:
+    morning:
+      weekday:
+        - "Melakukan pemantauan topologi jaringan lokal dan analisis throughput lalu lintas data pada switch distribusi. Melakukan verifikasi alokasi subnet IP serta pemeriksaan integritas konfigurasi routing protokol untuk memastikan stabilitas koneksi antar departemen."
+        - "Melakukan audit keamanan port jaringan dan pembaruan aturan firewall pada router perimeter. Memeriksa log aktivitas anomali pada sistem pencegahan intrusi (IPS) serta menyusun rencana mitigasi kerentanan segmen jaringan."
+      saturday:
+        - "Melakukan pemeriksaan fisik perangkat rak server jaringan dan penataan manajemen kabel patch panel. Memverifikasi fungsionalitas sistem pendingin ruangan server dan stabilitas daya cadangan UPS."
+      sunday:
+        - "Melakukan peninjauan cadangan konfigurasi perangkat jaringan dan sinkronisasi dokumentasi skema VLAN. Memverifikasi kesiapan infrastruktur jaringan sebelum dimulainya operasional kerja mingguan."
+    afternoon:
+      weekday:
+        - "Melakukan konfigurasi lanjutan virtual local area network (VLAN) dan implementasi quality of service (QoS) untuk prioritas lalu lintas data penting. Menjalankan uji beban koneksi dan pengukuran latensi jaringan end-to-end."
+        - "Melakukan penanganan tiket insiden gangguan jaringan pengguna dan penggantian perangkat keras switch yang mengalami kegagalan fungsi. Memvalidasi kestabilan koneksi internet pasca-penyesuaian konfigurasi gateway."
+      saturday:
+        - "Melakukan pengujian kecepatan berkala dan analisis ketersediaan bandwidth cadangan pada koneksi failover. Memastikan seluruh rute redundansi jaringan berfungsi secara otomatis saat terjadi kegagalan jalur utama."
+      sunday:
+        - "Melakukan pencadangan konfigurasi rutin seluruh switch dan router inti ke server repositori terpusat. Memastikan cadangan konfigurasi dapat dipulihkan dengan cepat dalam skenario pemulihan bencana."
+
+  general:
+    morning:
+      weekday:
+        - "Mengikuti sesi briefing koordinasi teknis pagi bersama tim pembimbing lapangan untuk pembagian target kerja harian. Melakukan analisis spesifikasi tugas yang diberikan serta menyiapkan lingkungan kerja dan berkas kerja pendukung."
+      saturday:
+        - "Melakukan rekapitulasi data hasil pengujian operasional selama sepekan dan pembersihan berkas kerja sementara. Menyiapkan ringkasan laporan progres teknis untuk evaluasi pembimbing lapangan."
+      sunday:
+        - "Menyusun catatan evaluasi mandiri terhadap pencapaian target kerja mingguan dan mempelajari materi teknis tambahan terkait proyek yang sedang dikerjakan guna meningkatkan efektivitas kerja."
+    afternoon:
+      weekday:
+        - "Melaksanakan eksekusi teknis sesuai dengan pembagian tugas yang disepakati pada sesi pagi. Melakukan pencatatan kendala operasional yang ditemukan serta mendiskusikan alternatif penyelesaian bersama tim teknis."
+      saturday:
+        - "Menyelesaikan perapian dokumen kerja dan pengarsipan data ke sistem repositori terpusat. Melakukan pemeriksaan ulang terhadap status tiket pekerjaan akhir pekan."
+      sunday:
+        - "Melakukan pengecekan kesiapan perangkat kerja dan penyusunan agenda prioritas untuk hari kerja berikutnya."
+
+# Daftar Kegiatan Kustom Tambahan (Opsional)
+# Jika diisi, bot dapat memilih secara acak dari daftar ini
+custom_activities: []
